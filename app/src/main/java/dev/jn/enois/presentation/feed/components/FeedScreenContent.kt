@@ -42,6 +42,7 @@ fun FeedScreenContent(
     onProvideReactionSummary: (String, ReactionSummary, ReactionType?) -> Unit,
     onNavigateToPostDetails: (FeedPost) -> Unit,
     onNavigateToMediaViewer: (String) -> Unit,
+    onNavigateToProfile: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -89,7 +90,8 @@ fun FeedScreenContent(
                         onReactionAction = onReactionAction,
                         onCommentClick = {
                             commentsPostId = post.id
-                        }
+                        },
+                        onUserClick = onNavigateToProfile
                     )
                 }
             }

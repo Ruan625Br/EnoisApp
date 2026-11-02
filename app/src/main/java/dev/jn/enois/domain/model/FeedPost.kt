@@ -57,6 +57,7 @@ enum class PostType {
     DIVERTIDO,
     MOMENT,
     BLOG,
+    POLL
 }
 
 enum class PostVisibility {

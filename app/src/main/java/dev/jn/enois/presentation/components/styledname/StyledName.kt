@@ -16,7 +16,8 @@ fun StyledName(
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.titleSmall,
     color: Color = MaterialTheme.colorScheme.onSurface,
-) {
+    glow: Color? = null
+    ) {
     if (style == null) {
         Text(name, modifier, color = color, style = textStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
         return
@@ -24,10 +25,25 @@ fun StyledName(
 
     val art = style.nameplate?.let { Nameplates[it] }
     if (art == null) {
-        PaintedName(name, style, textStyle, fallbackColor = color, modifier = modifier)
+        PaintedName(
+            name = name,
+            style = style,
+            textStyle = textStyle,
+            fallbackColor = color,
+            glow = glow,
+            modifier = modifier
+        )
     } else {
         Nameplate(art, modifier) {
-            PaintedName(name, style, textStyle, fallbackColor = color, plateInk = art.ink)
+            PaintedName(
+                name = name,
+                style = style,
+                textStyle = textStyle,
+                fallbackColor = color,
+                glow = glow,
+
+                plateInk = art.ink
+            )
         }
     }
 }

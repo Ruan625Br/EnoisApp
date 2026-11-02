@@ -37,5 +37,24 @@ data class UserProfile(
     val avatarFrame: String?,
     val resumeUrl: String?,
     val resumeName: String?,
-    val badges: List<String>?
-)
+    val badges: List<String>?,
+    val postsCount: Int?,
+    val nameFont: ProfileNameFont?,
+    val nameColor: String?,
+    val nameTheme: ProfileNameTheme?,
+    val contributorTagColor: String?,
+    val cardTheme: String?,
+    val nameplate: String?,
+    val bannerItem: String?,
+    val profileEffect: String?,
+    val statusText: String?,
+    val statusIcon: String?
+) {
+
+    fun nameStyle() = AuthorNameStyle(
+        theme = nameTheme,
+        font = nameFont,
+        color = nameColor,
+        nameplate = nameplate
+    )
+}

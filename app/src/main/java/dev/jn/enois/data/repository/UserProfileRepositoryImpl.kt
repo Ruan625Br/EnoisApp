@@ -17,4 +17,9 @@ class UserProfileRepositoryImpl(
         val response = userProfileApi.getById(id)
         response.toDomain()
     }
+
+    override suspend fun getProfileByUsername(username: String) = apiCall {
+        val response = userProfileApi.getByUsername(username)
+        response.toDomain()
+    }
 }

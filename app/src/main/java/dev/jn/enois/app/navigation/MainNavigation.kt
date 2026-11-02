@@ -39,6 +39,7 @@ import dev.jn.enois.presentation.components.richtext.ProvideEmotes
 import dev.jn.enois.presentation.feed.FeedRoute
 import dev.jn.enois.presentation.media.viewer.MediaViewerRoute
 import dev.jn.enois.presentation.postdetails.PostDetailRoute
+import dev.jn.enois.presentation.profile.ProfileRoute
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -173,6 +174,9 @@ fun MainNavigation(modifier: Modifier = Modifier) {
                                     },
                                     onNavigateToConversations = {
                                         backStack.add(AppScreen.ConversationsScreen)
+                                    },
+                                    onNavigateToProfile = { username ->
+                                        backStack.add(AppScreen.ProfileScreen(username))
                                     }
                                 )
                             }
@@ -212,6 +216,12 @@ fun MainNavigation(modifier: Modifier = Modifier) {
                                     openConversation = { conversationId ->
                                         backStack.add(AppScreen.ChatScreen(conversationId))
                                     }
+                                )
+                            }
+
+                            entry<AppScreen.ProfileScreen>(metadata = SlideMeta) { key ->
+                                ProfileRoute(
+                                    username = key.username,
                                 )
                             }
                         }

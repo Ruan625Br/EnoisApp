@@ -23,8 +23,15 @@ enum class AvatarFrameType(
     GALAXIA("moldura-galaxia", isFx = true),
     PORTAL("moldura-portal", isFx = true),
     HOLOGRAM("moldura-holograma", isFx = true),
+    MARE("moldura-mare", isFx = true),
+    TREPADEIRA("moldura-trepadeira", isFx = true),
+    VENDAVAL("moldura-vendaval", isFx = true),
+    VAGA_LUMES("moldura-vaga-lumes", isFx = true),
+    FLIPERAMA("moldura-fliperama", isFx = true),
+    CIRCUITO("moldura-circuito", isFx = true),
+    NEON("moldura-neon", isFx = true),
+    RADAR("moldura-radar", isFx = true),
 
-    // Sazonais (SEASONAL_FX_FRAMES da web)
     REDEMOINHO("moldura-redemoinho", isFx = true, isSeasonal = true),
     CARAPUCA("moldura-carapuca", isFx = true, isSeasonal = true),
     CACHIMBO("moldura-cachimbo", isFx = true, isSeasonal = true),

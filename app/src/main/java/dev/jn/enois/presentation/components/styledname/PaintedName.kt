@@ -47,6 +47,10 @@ private fun resolvePaint(spec: NameThemeSpec, userColor: Color?, primary: Color)
     return ResolvedPaint(evenStops(colors).toTypedArray(), vertical = false)
 }
 
+private fun cssBlurToRadius(cssBlurPx: Float): Float =
+    ((cssBlurPx / 2f - 0.5f) / 0.57735f).coerceAtLeast(0f)
+
+
 @Composable
 internal fun PaintedName(
     name: String,
@@ -55,6 +59,7 @@ internal fun PaintedName(
     fallbackColor: Color,
     modifier: Modifier = Modifier,
     plateInk: Color? = null,
+    glow: Color? = null,
 ) {
     val spec = remember(style.theme) { NameThemes.spec(style.theme) }
     val userColor = remember(style.color) { parseHexColor(style.color) }
@@ -84,9 +89,18 @@ internal fun PaintedName(
     }
 
     Box(modifier.glitch(motion, progress)) {
+        glow?.let { g ->
+            val shadow = with(density) { Shadow(g, Offset.Zero, cssBlurToRadius(10.dp.toPx())) }
+            Text(
+                text = name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = base.copy(color = g.copy(alpha = 1f), shadow = shadow),
+            )
+        }
         spec.shadows.forEach { sh ->
             val shadow = with(density) {
-                Shadow(sh.color, Offset(sh.dx.dp.toPx(), sh.dy.dp.toPx()), sh.blur.dp.toPx())
+                Shadow(sh.color, Offset(sh.dx.dp.toPx(), sh.dy.dp.toPx()), cssBlurToRadius(sh.blur.dp.toPx()))
             }
             Text(
                 text = name,
@@ -156,7 +170,7 @@ private fun rememberNameClock(motion: NameMotion): FloatState? {
 }
 
 @Composable
-private fun rememberAnimationsEnabled(): Boolean {
+fun rememberAnimationsEnabled(): Boolean {
     val resolver = LocalContext.current.contentResolver
     return remember {
         Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f

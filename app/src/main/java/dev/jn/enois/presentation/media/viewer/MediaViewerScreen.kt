@@ -67,7 +67,7 @@ private fun MediaViewerScreen(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxSize()
-                    .mediaSharedBounds(mediaId),
+                   ,
             )
         }
     }

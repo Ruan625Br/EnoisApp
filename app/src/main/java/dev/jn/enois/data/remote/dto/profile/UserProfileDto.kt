@@ -36,5 +36,16 @@ data class UserProfileDto(
     val avatarFrame: String? = null,
     val resumeUrl: String? = null,
     val resumeName: String? = null,
-    val badges: List<String>?
+    val badges: List<String>?,
+    val postsCount: Int?,
+    val nameFont: String?,
+    val nameColor: String?,
+    val nameTheme: String?,
+    val contributorTagColor: String?,
+    val cardTheme: String?,
+    val nameplate: String?,
+    val bannerItem: String?,
+    val profileEffect: String?,
+    val statusText: String?,
+    val statusIcon: String?
 )

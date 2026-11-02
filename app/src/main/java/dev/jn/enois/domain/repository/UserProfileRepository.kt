@@ -7,4 +7,5 @@ interface UserProfileRepository {
     suspend fun getCurrentProfile(): Result<UserProfile>
 
     suspend fun getProfileById(id: String): Result<UserProfile>
+    suspend fun getProfileByUsername(username: String): Result<UserProfile>
 }

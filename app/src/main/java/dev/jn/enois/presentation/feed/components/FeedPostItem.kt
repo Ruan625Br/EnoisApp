@@ -3,6 +3,7 @@ package dev.jn.enois.presentation.feed.components
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +46,7 @@ fun FeedPostItem(
     reactionState: PostReactionsState,
     onLoadMedia: (List<String>) -> Unit,
     onProvideReactionSummary: (String, ReactionSummary) -> Unit,
+    onUserClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     showFullPost: Boolean = false
 ) {
@@ -65,6 +67,7 @@ fun FeedPostItem(
         mediaUiState = mediaUiState,
         reactionState = reactionState,
         onLoadMedia = onLoadMedia,
+        onUserClick = onUserClick,
         modifier = modifier,
         showFullPost = showFullPost
     )
@@ -80,6 +83,7 @@ fun FeedPostItemContent(
     mediaUiState: MediaUiState,
     reactionState: PostReactionsState,
     onLoadMedia: (List<String>) -> Unit,
+    onUserClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     showFullPost: Boolean = false,
 ) {
@@ -96,11 +100,7 @@ fun FeedPostItemContent(
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize()
-            .postSharedBounds(
-                postId = post.id,
-                sharedTransitionScope = LocalSharedTransitionScope.current,
-                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-            )
+
     ) {
         Column(
             modifier = Modifier
@@ -110,7 +110,10 @@ fun FeedPostItemContent(
             PostHeader(
                 post = post,
                 badges = badges,
-                formattedTime = formattedTime
+                formattedTime = formattedTime,
+                onUserClick = {
+                    onUserClick(post.authorUsername)
+                }
             )
 
             CollapsibleRichText(
@@ -165,6 +168,7 @@ private fun PostHeader(
     post: FeedPost,
     badges: List<String>,
     formattedTime: String,
+    onUserClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -173,6 +177,12 @@ private fun PostHeader(
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         UserAvatar(
+            modifier = Modifier
+                .clickable(
+                    onClick = {
+                        onUserClick()
+                    }
+                ),
             url = post.authorAvatar.orEmpty(),
             userName = post.authorName,
             frame = post.authorAvatarFrame

@@ -113,7 +113,8 @@ private fun PostDetailsScreen(
                     onMediaClick = onNavigateToMediaViewer,
                     onCommentClick = {
                         commentsPostId = post.id
-                    }
+                    },
+                    onUserClick = {}
                 )
 
             }

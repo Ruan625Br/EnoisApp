@@ -61,6 +61,14 @@ fun AvatarFrameFx(frame: AvatarFrameType, modifier: Modifier = Modifier) {
                 AvatarFrameType.SUPERNOVA -> drawSupernova(t, still)
                 AvatarFrameType.PORTAL -> drawPortal(t, still)
                 AvatarFrameType.GALAXIA -> galaxia?.let { drawGalaxia(t, it, still) }
+                AvatarFrameType.MARE -> drawMare(t, still)
+                AvatarFrameType.TREPADEIRA -> drawTrepadeira(t, still)
+                AvatarFrameType.VENDAVAL -> drawVendaval(t, still)
+                AvatarFrameType.VAGA_LUMES -> drawVagaLumes(t, still)
+                AvatarFrameType.FLIPERAMA -> drawFliperama(t, still)
+                AvatarFrameType.CIRCUITO -> drawCircuito(t, still)
+                AvatarFrameType.NEON -> drawNeon(t, still)
+                AvatarFrameType.RADAR -> drawRadar(t, still)
                 else -> seasonal?.let {
                     it.t = t
                     it.still = still

@@ -1,6 +1,8 @@
 package dev.jn.enois.data.mapper
 
 import dev.jn.enois.data.remote.dto.profile.UserProfileDto
+import dev.jn.enois.domain.model.ProfileNameFont
+import dev.jn.enois.domain.model.ProfileNameTheme
 import dev.jn.enois.domain.model.UserProfile
 
 fun UserProfileDto.toDomain() = UserProfile(
@@ -36,5 +38,16 @@ fun UserProfileDto.toDomain() = UserProfile(
     avatarFrame = avatarFrame,
     resumeUrl = resumeUrl,
     resumeName = resumeName,
-    badges = badges
+    badges = badges,
+    postsCount = postsCount,
+    nameFont = ProfileNameFont.fromName(nameFont),
+    nameColor = nameColor,
+    nameTheme = ProfileNameTheme.from(nameTheme),
+    contributorTagColor = contributorTagColor,
+    cardTheme = cardTheme,
+    nameplate = nameplate,
+    bannerItem = bannerItem,
+    profileEffect = profileEffect,
+    statusText = statusText,
+    statusIcon = statusIcon
 )

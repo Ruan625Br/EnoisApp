@@ -1,6 +1,8 @@
 package dev.jn.enois.presentation.components.avatar
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
@@ -17,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -25,6 +28,10 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import dev.jn.enois.domain.model.AvatarFrameType
 import dev.jn.enois.presentation.components.avatar.fx.AvatarFrameFx
+import dev.jn.enois.presentation.components.avatar.fx.LocalAvatarFxClock
+import dev.jn.enois.presentation.components.avatar.fx.rememberFreeRunningClock
+import dev.jn.enois.presentation.components.avatar.fx.vendavalSwayRot
+import dev.jn.enois.presentation.components.avatar.fx.vendavalSwayX
 
 @Composable
 fun UserAvatar(
@@ -35,6 +42,7 @@ fun UserAvatar(
     textStyle: TextStyle = MaterialTheme.typography.titleLarge,
     shape: Shape = MaterialTheme.shapes.medium,
     size: Dp = 40.dp,
+    borderStroke: BorderStroke? = null
 ) {
 
     val context = LocalPlatformContext.current
@@ -51,14 +59,36 @@ fun UserAvatar(
     var failed by remember(urlResolved) { mutableStateOf(false) }
     var loading by remember(urlResolved) { mutableStateOf(true) }
 
+    val swayClock = if (frame == AvatarFrameType.VENDAVAL) {
+        LocalAvatarFxClock.current ?: rememberFreeRunningClock()
+    } else null
+
     Box(
         modifier = modifier.size(size),
         contentAlignment = Alignment.Center,
     ) {
+        val targetShape = if (frame != null) CircleShape else shape
         Box(
             Modifier
                 .matchParentSize()
-                .clip(if (frame != null) CircleShape else shape),
+                .clip(targetShape)
+                .then(
+                    if (swayClock != null) {
+                        Modifier.graphicsLayer {
+                            val t = swayClock.floatValue
+                            translationX = vendavalSwayX(t) * this.size.width
+                            rotationZ = vendavalSwayRot(t)
+                        }
+                    } else Modifier,
+                )
+                .then(
+                    if (borderStroke != null) {
+                        Modifier
+                            .border(borderStroke, targetShape)
+                    } else {
+                        Modifier
+                    }
+                ),
         ) {
             if (loading || failed) {
                 UserAvatarFallback(userName = userName, style = textStyle)

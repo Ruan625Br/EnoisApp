@@ -15,12 +15,10 @@ import dev.jn.enois.presentation.components.avatar.fx.rgb
 import kotlin.math.sin
 
 
-private fun k(hex: Int, a: Float = 1f): Color =
-    rgb(hex, a)
+private fun k(hex: Int, a: Float = 1f): Color = rgb(hex, a)
 
 private val FRAME_ICON_KEYS = HashMap<String, Set<String>>()
 
-/** Constrói o nó sob demanda e guarda quais ícones ele usa (para pré-carregar os SVGs). */
 private fun art(id: String, build: () -> FxNode): Pair<String, Lazy<FxNode>> = id to lazy {
     val keys = LinkedHashSet<String>()
     val prev = IconRecorder.current
@@ -33,27 +31,22 @@ private fun art(id: String, build: () -> FxNode): Pair<String, Lazy<FxNode>> = i
     }
 }
 
-/** Chaves de ícone (assets/icons/<chave>.svg) que a moldura `id` desenha. */
 internal fun seasonalIconKeys(id: String): Set<String> {
     SEASONAL_FRAME_ART[id]?.value
     return FRAME_ICON_KEYS[id].orEmpty()
 }
 
-/** Id da web (`moldura-xxx`) -> desenho. */
 private val SEASONAL_FRAME_ART: Map<String, Lazy<FxNode>> by lazy {
-    (saci() + halloween() + folclore() + natal() + reveillon() + carnaval() + junina() +
-            namorados() + flor() + dev() + criancas()).toMap()
+    (saci() + halloween() + folclore() + natal() + reveillon() + carnaval() + junina() + namorados() + flor() + dev() + criancas()).toMap()
 }
 
 internal fun DrawScope.drawSeasonal(id: String, c: SeasonalCtx) {
     SEASONAL_FRAME_ART[id]?.value?.invoke(this, c)
 }
 
-// ===== saci.tsx =============================================================================
 
 private class Whirl(val r: Float, val a: Float, val b: Float, val color: Color, val w: Float)
 
-/** Arcos de vento tracejados girando: o redemoinho do Saci. */
 private fun whirl(vararg arcs: Whirl): FxNode = animated(
     "spin", 0f, null,
     group(arcs.map {
@@ -106,13 +99,7 @@ private fun saci() = listOf(
     },
     art("moldura-mata") {
         orbit(
-            listOf("folhaEscura", "folha"),
-            22,
-            56f,
-            0.7f,
-            spin = "",
-            each = "sway",
-            stagger = 0.15f
+            listOf("folhaEscura", "folha"), 22, 56f, 0.7f, spin = "", each = "sway", stagger = 0.15f
         )
     },
     art("moldura-saci-completo") {
@@ -128,7 +115,6 @@ private fun saci() = listOf(
     },
 )
 
-// ===== halloween.tsx ========================================================================
 
 private val BAT_WING: FxNode = group(
     pathNode(
@@ -225,17 +211,14 @@ private fun halloween() = listOf(
     },
 )
 
-// ===== folclore.tsx =========================================================================
 
-/** Os pés virados para trás do Curupira andando em volta, com um fogo em cima. */
 private fun curupira(): FxNode {
     val feet = List(10) { i ->
         perch("pe", i * 36f, 62f + if (i % 2 == 1) 3.5f else -3.5f, 1f, i * 36f - 90f)
     }
     val fire = listOf(-28f, -14f, 0f, 14f, 28f).mapIndexed { i, a ->
         val o = polar(
-            46.0,
-            a.toDouble()
+            46.0, a.toDouble()
         )
         at(
             o.x, o.y, a,
@@ -249,20 +232,16 @@ private fun curupira(): FxNode {
     return group(animated("spin-slow", 0f, null, group(feet)), group(fire))
 }
 
-/** A cobra de fogo: cada bolinha é o corpo um pouco mais atrás. */
 private fun boitata(): FxNode {
     val body = List(26) { kk ->
         val o = polar(
-            60.0 + sin(kk * 0.8) * 2.6,
-            -kk * 8.5
+            60.0 + sin(kk * 0.8) * 2.6, -kk * 8.5
         )
         circle(
             o.x, o.y,
-            r2(6.4 - kk * 0.2)
-                .toFloat(),
+            r2(6.4 - kk * 0.2).toFloat(),
             fill = Color.hsl(42f - kk * 1.4f, 0.96f, (58f - kk * 0.8f) / 100f),
-            opacity = r2(1.0 - kk / 30.0)
-                .toFloat(),
+            opacity = r2(1.0 - kk / 30.0).toFloat(),
         )
     }.reversed()
     val h = polar(60.0, 4.0)
@@ -272,11 +251,7 @@ private fun boitata(): FxNode {
         at(
             h.x, h.y, 94f,
             ellipse(
-                0f,
-                0f,
-                6f,
-                8f,
-                k(0xF97316)
+                0f, 0f, 6f, 8f, k(0xF97316)
             ),
             circle(-2.6f, -3f, 1.7f, fill = k(0xFFFBEB)),
             circle(2.6f, -3f, 1.7f, fill = k(0xFFFBEB)),
@@ -320,14 +295,7 @@ private fun folclore() = listOf(
     },
     art("moldura-vitoria") {
         orbit(
-            listOf("vitoria"),
-            8,
-            61f,
-            0.85f,
-            spin = "",
-            rotate = true,
-            each = "bob",
-            stagger = 0.3f
+            listOf("vitoria"), 8, 61f, 0.85f, spin = "", rotate = true, each = "bob", stagger = 0.3f
         )
     },
     art("moldura-lobisomem") {
@@ -339,7 +307,6 @@ private fun folclore() = listOf(
     },
 )
 
-// ===== natal.tsx ============================================================================
 
 private fun natal() = listOf(
     art("moldura-pisca") {
@@ -357,8 +324,7 @@ private fun natal() = listOf(
             orbit(listOf("folhaEscura", "folha"), 24, 56f, 0.6f, spin = ""),
             group(List(8) { i ->
                 val o = polar(
-                    58.0,
-                    22.0 + i * 45
+                    58.0, 22.0 + i * 45
                 )
                 circle(o.x, o.y, 2.4f, fill = k(0xDC2626))
             }),
@@ -396,7 +362,6 @@ private fun natal() = listOf(
     },
 )
 
-// ===== reveillon.tsx ========================================================================
 
 private fun reveillon() = listOf(
     art("moldura-fogos") { bursts(listOf("fogos", "fogosVerde"), 7, 41, 1.1f) },
@@ -425,20 +390,16 @@ private fun reveillon() = listOf(
     art("moldura-uvas") { orbit(listOf("uva"), 12, 61f, 0.55f, spin = "spin-slow") },
 )
 
-// ===== carnaval.tsx =========================================================================
 
 private val CONFETTI = listOf(0xEC4899, 0xF59E0B, 0x22C55E, 0x3B82F6, 0xA855F7).map { k(it) }
 
-/** Três serpentinas girando e confete solto cintilando. */
 private fun serpentina(): FxNode {
     val rnd = SeededRandom(7)
     val confetti = List(16) { i ->
         val p = polar(
-            54 + rnd.next() * 20,
-            rnd.next() * 360
+            54 + rnd.next() * 20, rnd.next() * 360
         )
-        val turn = r2(rnd.next() * 180)
-            .toFloat()
+        val turn = r2(rnd.next() * 180).toFloat()
         val delay = -rnd.next() * 2
         at(
             p.x, p.y, turn,
@@ -459,8 +420,7 @@ private fun serpentina(): FxNode {
             "spin-slow", 0f, null,
             group(listOf(0xEC4899, 0xF59E0B, 0x22C55E).mapIndexed { i, c ->
                 wave(
-                    k(c),
-                    phase = i * 120f
+                    k(c), phase = i * 120f
                 )
             }),
         ),
@@ -468,15 +428,13 @@ private fun serpentina(): FxNode {
     )
 }
 
-/** O avatar vira o couro do pandeiro; os platinelas giram em volta. */
 private fun pandeiro(): FxNode = group(
     ring(k(0xB45309), 5f, "", 54f),
     animated(
         "spin-slow", 0f, null,
         group(List(8) { i ->
             val o = polar(
-                54.0,
-                i * 45.0
+                54.0, i * 45.0
             )
             at(
                 o.x, o.y, i * 45f,
@@ -514,7 +472,6 @@ private fun carnaval() = listOf(
     art("moldura-pandeiro") { pandeiro() },
 )
 
-// ===== junina.tsx ===========================================================================
 
 private val FLAG_COLORS = listOf(0xEF4444, 0xF59E0B, 0x10B981, 0x3B82F6, 0xA855F7, 0xEC4899).map {
     k(
@@ -526,13 +483,11 @@ private val FLAG_PATH = Path().apply {
     moveTo(-5f, 0f); lineTo(5f, 0f); lineTo(5f, -11f); lineTo(0f, -7.5f); lineTo(-5f, -11f); close()
 }
 
-/** Um varal de bandeirinhas sobre a cabeça e a fogueira embaixo. */
 private fun bandeirinhas(): FxNode {
     val flags = List(13) { i ->
         val a = -78f + 13f * i
         val o = polar(
-            60.0,
-            a.toDouble()
+            60.0, a.toDouble()
         )
         at(
             o.x, o.y, a,
@@ -566,7 +521,6 @@ private fun junina() = listOf(
     art("moldura-estrelinha") { bursts(listOf("estrelinha"), 7, 71, 1f, 90f to 270f) },
 )
 
-// ===== namorados.tsx ========================================================================
 
 private fun namorados() = listOf(
     art("moldura-coracoes") {
@@ -601,7 +555,6 @@ private fun namorados() = listOf(
     },
 )
 
-// ===== flor.tsx =============================================================================
 
 private val ARARA_WING: FxNode = group(
     listOf(
@@ -624,10 +577,8 @@ private val ARARA_WING: FxNode = group(
 private val IPE_TWIG = Path().apply { moveTo(-14f, 6f); quadraticTo(0f, -2f, 14f, 6f) }
 private val IPE_TWIG_SMALL = Path().apply { moveTo(-12f, 6f); quadraticTo(0f, -2f, 12f, 6f) }
 
-/** Um cacho de ipê num galho, no ângulo `a` do círculo. */
 private fun ipeCluster(a: Float): FxNode {
-    val o =
-        polar(58.0, a.toDouble())
+    val o = polar(58.0, a.toDouble())
     return at(
         o.x, o.y, a,
         pathNode(IPE_TWIG, stroke = k(0x78350F), sw = 1.6f),
@@ -637,12 +588,10 @@ private fun ipeCluster(a: Float): FxNode {
     )
 }
 
-/** Florada: recompensa de evento que ganha um cacho de ipê por semana de setembro (stage 0..6). */
 private fun florada(stage: Int = 6): FxNode =
     group(listOf(-40f, 140f, 40f, 220f, -100f, 100f).take(stage).map { a ->
         val o = polar(
-            58.0,
-            a.toDouble()
+            58.0, a.toDouble()
         )
         at(
             o.x, o.y, a,
@@ -706,17 +655,14 @@ private fun flor() = listOf(
     art("moldura-florada") { florada() },
 )
 
-// ===== dev.tsx ==============================================================================
 
 private const val TERMINAL_PROMPT = "~/enois \$ git push origin main && echo deploy ·"
 
-/** Um headset com microfone e a luz verde de "ao vivo". */
 private fun fone(): FxNode = group(
     pathNode(arcPath(53f, -72f, 72f), stroke = k(0x334155), sw = 5f, cap = StrokeCap.Round),
     group(listOf(-80f, 80f).map { a ->
         val o = polar(
-            52.0,
-            a.toDouble()
+            52.0, a.toDouble()
         )
         rect(
             rf(o.x - 6f), rf(o.y - 11f), 12f, 22f,
@@ -751,8 +697,6 @@ private fun dev() = listOf(
     },
     art("moldura-toalha") {
         group(
-            // Manrope não é fonte do app Compose: cai na fonte padrão (diferença de largura é absorvida
-            // pelo textLength)
             textRing(
                 "não entre em pânico · 42 · não entre em pânico · 42 ·", k(0x0284C7),
                 6.6f, FontFamily.Default, 62f, "spin-rev",
@@ -771,7 +715,6 @@ private fun dev() = listOf(
     },
 )
 
-// ===== criancas.tsx =========================================================================
 
 private fun criancas() = listOf(
     art("moldura-pipas") {

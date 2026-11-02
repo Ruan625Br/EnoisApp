@@ -26,7 +26,6 @@ import dev.jn.enois.domain.model.Media
 import dev.jn.enois.presentation.components.avatar.resolveCdnUrl
 import dev.jn.enois.presentation.media.MediaLoadState
 import dev.jn.enois.presentation.media.MediaUiState
-import dev.jn.enois.presentation.media.viewer.mediaSharedBounds
 
 @Composable
 fun PostMediaGrid(
@@ -107,8 +106,7 @@ private fun MediaItem(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .mediaSharedBounds(media.id),
+                    .fillMaxSize(),
                 onLoading = { loading = true },
                 onSuccess = { loading = false },
                 onError = {

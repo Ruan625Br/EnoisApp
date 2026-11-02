@@ -12,6 +12,7 @@ import dev.jn.enois.presentation.media.MediaViewModel
 import dev.jn.enois.presentation.postdetails.PostDetailsCache
 import dev.jn.enois.presentation.postdetails.PostDetailsViewModel
 import dev.jn.enois.presentation.profile.CurrentUserStore
+import dev.jn.enois.presentation.profile.ProfileViewModel
 import dev.jn.enois.presentation.profile.UserProfileCache
 import dev.jn.enois.presentation.reactions.ReactionViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +32,7 @@ val presentationModule = module {
     viewModelOf(::CommentsViewModel)
     viewModelOf(::ConversationsViewModel)
     viewModelOf(::ChatViewModel)
+    viewModelOf(::ProfileViewModel)
 
     single { PostDetailsCache() }
     single { UserProfileCache(get(), CoroutineScope(SupervisorJob() + Dispatchers.Default)) }

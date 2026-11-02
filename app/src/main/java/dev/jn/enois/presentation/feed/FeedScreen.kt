@@ -50,6 +50,7 @@ fun FeedRoute(
     onNavigateToPostDetails: (String) -> Unit,
     onNavigateToMediaViewer: (String) -> Unit,
     onNavigateToConversations: () -> Unit,
+    onNavigateToProfile: (String) -> Unit,
     modifier: Modifier = Modifier,
     feedViewModel: FeedViewModel = koinViewModel(),
     mediaViewModel: MediaViewModel = koinViewModel(),
@@ -72,6 +73,7 @@ fun FeedRoute(
         },
         onNavigateToMediaViewer = onNavigateToMediaViewer,
         onNavigateToConversations = onNavigateToConversations,
+        onNavigateToProfile = onNavigateToProfile,
         onLoadMedia = mediaViewModel::loadMedia,
         onProvideReactionSummary = reactionViewModel::provideFeedSummary,
         onReactionAction = reactionViewModel::onReactionAction,
@@ -92,6 +94,7 @@ private fun FeedScreen(
     onNavigateToPostDetails: (FeedPost) -> Unit,
     onNavigateToMediaViewer: (String) -> Unit,
     onNavigateToConversations: () -> Unit,
+    onNavigateToProfile: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -160,7 +163,8 @@ private fun FeedScreen(
                     onLoadMedia = onLoadMedia,
                     onProvideReactionSummary = onProvideReactionSummary,
                     onNavigateToPostDetails = onNavigateToPostDetails,
-                    onNavigateToMediaViewer = onNavigateToMediaViewer
+                    onNavigateToMediaViewer = onNavigateToMediaViewer,
+                    onNavigateToProfile = onNavigateToProfile
                 )
             }
 

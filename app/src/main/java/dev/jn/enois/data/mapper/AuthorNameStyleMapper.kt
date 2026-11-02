@@ -9,13 +9,8 @@ import dev.jn.enois.domain.model.SeasonalNameTheme
 
 fun AuthorNameStyleDto.toDomain(): AuthorNameStyle =
     AuthorNameStyle(
-        theme = theme?.toProfileNameTheme(),
+        theme = ProfileNameTheme.from(theme),
         font = ProfileNameFont.fromName(font),
         color = color,
         nameplate = nameplate
     )
-
-private fun String.toProfileNameTheme(): ProfileNameTheme? {
-    return SeasonalNameTheme.fromId(this)
-        ?: FreeProfileNameTheme.fromName(this)
-}

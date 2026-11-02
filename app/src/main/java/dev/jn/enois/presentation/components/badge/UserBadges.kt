@@ -12,10 +12,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import dev.jn.enois.presentation.components.avatar.resolveCdnUrl
 
 @Composable
 fun UserBadges(
@@ -54,7 +56,7 @@ private fun UserBadge(
     val context = LocalPlatformContext.current
 
     val data = remember(badge) {
-        if (isOfficialBadgeId(badge)) officialBadgeAsset(badge) else badge
+        if (isOfficialBadgeId(badge)) officialBadgeAsset(badge) else resolveCdnUrl(badge)
     }
 
     val model = remember(context, data) {
@@ -65,12 +67,13 @@ private fun UserBadge(
 
     Box(
         modifier
-            .size(15.dp)
+            .size(16.dp)
             .clip(shape)
     ) {
         AsyncImage(
             model = model,
             contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize(),
             onError = {

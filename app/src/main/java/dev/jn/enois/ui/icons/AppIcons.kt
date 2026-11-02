@@ -28,6 +28,8 @@ import dev.jn.enois.ui.icons.hardware as HardwareIcon
 import dev.jn.enois.ui.icons.favorite as FavoriteIcon
 import dev.jn.enois.ui.icons.delete as DeleteIcon
 import dev.jn.enois.ui.icons.logout as LogoutIcon
+import dev.jn.enois.ui.icons.enterprise as EnterpriseIcon
+import dev.jn.enois.ui.icons.location_on as LocationOnIcon
 
 object AppIcons {
     val ChatBubble: ImageVector get() = ChatBubbleIcon
@@ -58,4 +60,6 @@ object AppIcons {
     val Favorite: ImageVector get() = FavoriteIcon
     val Delete: ImageVector get() = DeleteIcon
     val Logout: ImageVector get() = LogoutIcon
+    val Enterprise: ImageVector get() = EnterpriseIcon
+    val LocationOn: ImageVector get() = LocationOnIcon
 }

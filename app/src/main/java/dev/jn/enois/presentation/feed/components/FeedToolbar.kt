@@ -32,10 +32,7 @@ fun FeedToolbar(
 
     Box(
         modifier = modifier
-            .toolbarSharedBounds(
-                sharedTransitionScope = LocalSharedTransitionScope.current,
-                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-            )
+
     ) {
         FeedTopFadeOverlay(
             modifier = Modifier

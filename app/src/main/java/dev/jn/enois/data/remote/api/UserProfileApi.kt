@@ -15,4 +15,7 @@ class UserProfileApi(
 
     suspend fun getById(id: String): UserProfileDto =
         client.get("users/by-id/$id").bodyOrThrow("Falha ao carregar perfil.")
+
+    suspend fun getByUsername(username: String): UserProfileDto =
+        client.get("users/$username").bodyOrThrow("Falha ao carregar perfil.")
 }

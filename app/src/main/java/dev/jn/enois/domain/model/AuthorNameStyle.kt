@@ -11,7 +11,16 @@ data class AuthorNameStyle(
 )
 
 
-sealed interface ProfileNameTheme
+sealed interface ProfileNameTheme {
+
+    companion object {
+        fun from(value: String?): ProfileNameTheme? {
+            if (value == null) return null
+            return SeasonalNameTheme.fromId(value)
+                ?: FreeProfileNameTheme.fromName(value)
+        }
+    }
+}
 
 
 enum class FreeProfileNameTheme : ProfileNameTheme {

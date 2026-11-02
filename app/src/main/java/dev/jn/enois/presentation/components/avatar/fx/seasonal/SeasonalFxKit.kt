@@ -36,23 +36,12 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
-/*
- * Porte do frame-kit.tsx + dos keyframes `cos-*` do styles.css.
- *
- * Modelo: cada "elemento JSX" vira um FxNode (lambda que desenha). Os geradores (seededRandom)
- * rodam UMA vez, quando o nó é construído, na mesma ordem do TS; o desenho por frame só lê `t`.
- * A ordem dos nós = ordem de pintura do JSX.
- */
 
 internal typealias FxNode = DrawScope.(SeasonalCtx) -> Unit
 
-/** `var(--primary)` do CSS: resolvido em desenho para o primário do tema do app. */
 internal val PrimaryColor: Color = Color.Unspecified
 
-/**
- * Estado compartilhado de um desenho (um por AvatarFrameFx, reaproveitado a cada frame).
- * `alpha` é a opacidade de grupo acumulada (os `opacity` de <g> e das animações cos-*).
- */
+
 internal class SeasonalCtx(val textMeasurer: TextMeasurer) {
     var t = 0f
     var still = false
@@ -60,20 +49,22 @@ internal class SeasonalCtx(val textMeasurer: TextMeasurer) {
     var alpha = 1f
     val textCache = HashMap<String, TextLayoutResult>()
 
-    // saída de solve() (transform + opacidade da animação corrente)
-    @JvmField var tx = 0f
-    @JvmField var ty = 0f
-    @JvmField var rot = 0f
-    @JvmField var sx = 1f
-    @JvmField var sy = 1f
-    @JvmField var op = 1f
+    @JvmField
+    var tx = 0f
+    @JvmField
+    var ty = 0f
+    @JvmField
+    var rot = 0f
+    @JvmField
+    var sx = 1f
+    @JvmField
+    var sy = 1f
+    @JvmField
+    var op = 1f
 
     fun col(c: Color): Color = if (c == Color.Unspecified) primary else c
 }
 
-// ---------------------------------------------------------------------------------------------
-// Animações `cos-anim cos-<nome>`
-// ---------------------------------------------------------------------------------------------
 
 internal val CssEaseIn = CubicBezierEasing(0.42f, 0f, 1f, 1f)
 
@@ -103,7 +94,6 @@ internal enum class CosAnim(val key: String, val duration: Float) {
     }
 }
 
-/** `alternate`: 0→1→0 em 2×duração. O easing é aplicado depois (todos os alternate são ease-in-out). */
 private fun alt(t: Float, dur: Float, delay: Float): Float {
     val x = cycle(t, dur * 2f, delay)
     return if (x < 0.5f) x * 2f else 2f - 2f * x
@@ -116,27 +106,23 @@ internal fun SeasonalCtx.solve(a: CosAnim, delay: Float, dur: Float?) {
         CosAnim.SPIN, CosAnim.SPIN_SLOW, CosAnim.SPIN_FAST -> rot = 360f * cycle(t, d, delay)
         CosAnim.SPIN_REV -> rot = -360f * cycle(t, d, delay)
 
-        // cos-flick .7s ease-in-out alternate: scale(1,.85) -> scale(.92,1.12)
         CosAnim.FLICK -> {
             val k = CssEaseInOut.transform(alt(t, d, delay))
             sx = lerp(1f, 0.92f, k); sy = lerp(0.85f, 1.12f, k)
         }
 
-        // cos-ripple 3.6s ease-out: scale 1 -> 1.5, opacity .9 -> 0
         CosAnim.RIPPLE -> {
             val k = CssEaseOut.transform(cycle(t, d, delay))
             sx = lerp(1f, 1.5f, k); sy = sx; op = lerp(0.9f, 0f, k)
         }
 
-        // cos-blink 2.4s ease-in-out: .35 -> 1 -> .35
-        CosAnim.BLINK -> op = kf(cycle(t, d, delay), CssEaseInOut, 0f to 0.35f, 0.5f to 1f, 1f to 0.35f)
+        CosAnim.BLINK -> op =
+            kf(cycle(t, d, delay), CssEaseInOut, 0f to 0.35f, 0.5f to 1f, 1f to 0.35f)
 
-        // cos-flap .5s alternate: scaleY 1 -> .35
         CosAnim.FLAP -> sy = lerp(1f, 0.35f, CssEaseInOut.transform(alt(t, d, delay)))
 
         CosAnim.SWAY -> rot = lerp(-8f, 8f, CssEaseInOut.transform(alt(t, d, delay)))
 
-        // cos-melt 4s linear
         CosAnim.MELT -> {
             val p = cycle(t, d, delay)
             ty = 78f * p
@@ -144,7 +130,6 @@ internal fun SeasonalCtx.solve(a: CosAnim, delay: Float, dur: Float?) {
             op = kf(p, LinearEasing, 0f to 0f, 0.15f to 1f, 0.7f to 0.9f, 1f to 0f)
         }
 
-        // cos-drift 5s ease-in: translate(-18,80) rotate(220) (transform 0%->100%), opacity por trechos
         CosAnim.DRIFT -> {
             val p = cycle(t, d, delay)
             val m = CssEaseIn.transform(p)
@@ -158,7 +143,6 @@ internal fun SeasonalCtx.solve(a: CosAnim, delay: Float, dur: Float?) {
             sx = lerp(1f, 0.6f, k); sy = sx
         }
 
-        // cos-rise 4s ease-out: translateY(0 -> -60) scale(.6 -> 1.1); opacity 0, 1 (20%), 0
         CosAnim.RISE -> {
             val p = cycle(t, d, delay)
             val m = CssEaseOut.transform(p)
@@ -167,7 +151,6 @@ internal fun SeasonalCtx.solve(a: CosAnim, delay: Float, dur: Float?) {
             op = kf(p, CssEaseOut, 0f to 0f, 0.2f to 1f, 1f to 0f)
         }
 
-        // cos-pop 2.4s ease-out: scale .1 -> 1 (60%) -> 1.15; opacity 0, 1 (15%), .9 (60%), 0
         CosAnim.POP -> {
             val p = cycle(t, d, delay)
             sx = kf(p, CssEaseOut, 0f to 0.1f, 0.6f to 1f, 1f to 1.15f); sy = sx
@@ -178,20 +161,16 @@ internal fun SeasonalCtx.solve(a: CosAnim, delay: Float, dur: Float?) {
         CosAnim.ROCK -> rot = lerp(-35f, 35f, CssEaseInOut.transform(alt(t, d, delay)))
         CosAnim.WOBBLE -> rot = lerp(-10f, 10f, CssEaseInOut.transform(alt(t, d, delay)))
 
-        // cos-shine 2.4s ease-in-out: scale .85 -> 1.12 (50%) -> .85
         CosAnim.SHINE -> {
-            sx = kf(cycle(t, d, delay), CssEaseInOut, 0f to 0.85f, 0.5f to 1.12f, 1f to 0.85f); sy = sx
+            sx = kf(cycle(t, d, delay), CssEaseInOut, 0f to 0.85f, 0.5f to 1.12f, 1f to 0.85f); sy =
+                sx
         }
 
         CosAnim.WING -> rot = lerp(-4f, 12f, CssEaseInOut.transform(alt(t, d, delay)))
     }
 }
 
-/**
- * `<g class="cos-anim cos-x" style="animation-delay/duration">`: transform + opacidade da animação em
- * volta de `body`. Em `still` (reduced-motion / lite) o CSS faz `animation: none`: estado-base.
- * transform-origin 0 0 = origem local (o translate/rotate/scale dos pais já está aplicado).
- */
+
 internal inline fun DrawScope.withAnim(
     c: SeasonalCtx,
     a: CosAnim?,
@@ -219,11 +198,6 @@ internal inline fun DrawScope.withAnim(
     c.alpha = prev
 }
 
-// ---------------------------------------------------------------------------------------------
-// Utilidades
-// ---------------------------------------------------------------------------------------------
-
-/** `round()` do TS (meio para cima, 2 casas). */
 internal fun rf(n: Float): Float = r2(n.toDouble()).toFloat()
 
 internal fun dash(vararg v: Float): PathEffect = PathEffect.dashPathEffect(v, 0f)
@@ -235,12 +209,10 @@ private fun dashOf(s: String): PathEffect? {
     return PathEffect.dashPathEffect(v, 0f)
 }
 
-/** `arc(r, a1, a2)` do kit: arco horário de a1 a a2 (0° no topo). Compose mede 0° à direita: -90. */
 internal fun arcPath(r: Float, a1: Float, a2: Float): Path = Path().apply {
     arcTo(Rect(-r, -r, r, r), a1 - 90f, a2 - a1, true)
 }
 
-/** `flame(w, h)` do kit (a base fica na origem, a ponta em -h). */
 internal fun flamePath(w: Float, h: Float): Path = Path().apply {
     moveTo(-w, 0f)
     cubicTo(-w, rf(-h * 0.45f), rf(-w * 0.15f), rf(-h * 0.55f), 0f, -h)
@@ -259,15 +231,10 @@ internal fun polarWavePath(r: Float, amp: Float, freq: Float, phase: Float): Pat
     close()
 }
 
-// ---------------------------------------------------------------------------------------------
-// Primitivas SVG (<g>, <circle>, <ellipse>, <rect>, <path>)
-// ---------------------------------------------------------------------------------------------
-
 internal fun group(vararg nodes: FxNode): FxNode = { c -> for (n in nodes) n(this, c) }
 
 internal fun group(nodes: List<FxNode>): FxNode = { c -> for (n in nodes) n(this, c) }
 
-/** `<g transform="...">`: o bloco monta o transform na mesma ordem do atributo SVG. */
 internal fun xform(transform: DrawTransform.() -> Unit, vararg nodes: FxNode): FxNode = { c ->
     withTransform(transform) { for (n in nodes) n(this, c) }
 }
@@ -279,8 +246,12 @@ internal fun at(x: Float, y: Float, rot: Float? = null, vararg nodes: FxNode): F
     }) { for (n in nodes) n(this, c) }
 }
 
-/** `<g {...anim(cls, delay, duration)}>`. */
-internal fun animated(cls: String, delay: Float = 0f, duration: Float? = null, vararg nodes: FxNode): FxNode {
+internal fun animated(
+    cls: String,
+    delay: Float = 0f,
+    duration: Float? = null,
+    vararg nodes: FxNode
+): FxNode {
     val a = CosAnim.of(cls)
     return { c -> withAnim(c, a, delay, duration) { for (n in nodes) n(this, c) } }
 }
@@ -342,16 +313,16 @@ internal fun pathNode(
         withAnim(c, a, delay, duration) {
             val al = c.alpha * opacity
             if (fill != null) drawPath(path, c.col(fill), al)
-            if (stroke != null) drawPath(path, c.col(stroke), al, Stroke(sw, cap = cap, join = join, pathEffect = dash))
+            if (stroke != null) drawPath(
+                path,
+                c.col(stroke),
+                al,
+                Stroke(sw, cap = cap, join = join, pathEffect = dash)
+            )
         }
     }
 }
 
-// ---------------------------------------------------------------------------------------------
-// frame-kit.tsx
-// ---------------------------------------------------------------------------------------------
-
-/** Ícone (COSMETIC_ICONS) no ponto, girado e escalado; `cls` anima em torno do centro do ícone. */
 internal fun place(
     key: String,
     x: Float, y: Float,
@@ -364,20 +335,16 @@ internal fun place(
     val py = rf(y)
     val pr = rf(rot)
     return { c ->
-        if (icon != null) {
-            withTransform({
-                translate(px, py)
-                rotate(pr, Offset.Zero)
-                scale(s, s, Offset.Zero)
-            }) {
-                // a animação fica DENTRO do scale: translateY(78px) do melt vale 78 * s
-                withAnim(c, a, delay, duration) { icon(this, c) }
-            }
+        withTransform({
+            translate(px, py)
+            rotate(pr, Offset.Zero)
+            scale(s, s, Offset.Zero)
+        }) {
+            withAnim(c, a, delay, duration) { icon(this, c) }
         }
     }
 }
 
-/** Ícone sobre o círculo de raio `r` no ângulo `a`. */
 internal fun perch(
     key: String, a: Float, r: Float, s: Float = 1f, rot: Float = 0f,
     cls: String = "", delay: Float = 0f,
@@ -386,7 +353,6 @@ internal fun perch(
     return place(key, o.x, o.y, s, rot, cls, delay)
 }
 
-/** Ícone usado como chapéu: a borda de baixo apoia no topo do avatar. */
 internal fun hat(key: String, s: Float, bottom: Float = 8.5f): FxNode =
     place(key, 0f, -38f - bottom * s, s)
 
@@ -410,12 +376,19 @@ internal fun orbit(
         }
         val jit = if (jitter != 0f) (rnd.next() - 0.5) * jitter else 0.0
         val o = polar(r + jit, a)
-        place(keys[i % keys.size], o.x, o.y, s, if (rotate) (a + rotOff).toFloat() else 0f, each, -i * stagger)
+        place(
+            keys[i % keys.size],
+            o.x,
+            o.y,
+            s,
+            if (rotate) (a + rotOff).toFloat() else 0f,
+            each,
+            -i * stagger
+        )
     }
     return if (spin.isNotEmpty()) animated(spin, 0f, null, group(items)) else group(items)
 }
 
-/** `<circle fill="none" stroke=c stroke-linecap="round" stroke-dasharray=dash>` */
 internal fun ring(c: Color, w: Float = 1.5f, dash: String = "", r: Float = 54f): FxNode {
     val effect = dashOf(dash)
     return { ctx ->
@@ -431,9 +404,18 @@ internal fun wave(
 ): FxNode = pathNode(polarWavePath(r, amp, freq, phase), stroke = c, sw = w, cap = StrokeCap.Round)
 
 internal fun ripples(c: Color, r: Float = 52f): FxNode =
-    group(listOf(0f, -1.2f, -2.4f).map { d -> circle(0f, 0f, r, stroke = c, sw = 1.4f, anim = "ripple", delay = d) })
+    group(listOf(0f, -1.2f, -2.4f).map { d ->
+        circle(
+            0f,
+            0f,
+            r,
+            stroke = c,
+            sw = 1.4f,
+            anim = "ripple",
+            delay = d
+        )
+    })
 
-/** Ícones caindo da borda de cima. */
 internal fun fallers(
     keys: List<String>, n: Int, seed: Int, s: Float,
     cls: String = "melt", spread: Float = 140f,
@@ -444,12 +426,20 @@ internal fun fallers(
         val y = -74 + rnd.next() * 6
         val delay = -rnd.next() * 4
         val dur = 3.4 + rnd.next() * 1.8
-        place(keys[i % keys.size], x.toFloat(), y.toFloat(), s, 0f, cls, delay.toFloat(), dur.toFloat())
+        place(
+            keys[i % keys.size],
+            x.toFloat(),
+            y.toFloat(),
+            s,
+            0f,
+            cls,
+            delay.toFloat(),
+            dur.toFloat()
+        )
     }
     return group(items)
 }
 
-/** Ícones subindo de uma caixa (fumaça, bolhas). */
 internal fun risers(
     keys: List<String>, n: Int, seed: Int, s: Float,
     x: Pair<Float, Float> = -60f to 60f,
@@ -461,12 +451,20 @@ internal fun risers(
         val py = y.first + rnd.next() * (y.second - y.first)
         val delay = -rnd.next() * 4
         val dur = 3.2 + rnd.next() * 1.6
-        place(keys[i % keys.size], px.toFloat(), py.toFloat(), s, 0f, "rise", delay.toFloat(), dur.toFloat())
+        place(
+            keys[i % keys.size],
+            px.toFloat(),
+            py.toFloat(),
+            s,
+            0f,
+            "rise",
+            delay.toFloat(),
+            dur.toFloat()
+        )
     }
     return group(items)
 }
 
-/** Ícones surgindo e sumindo em volta (fogos, estrelinhas). */
 internal fun bursts(
     keys: List<String>, n: Int, seed: Int, s: Float,
     range: Pair<Float, Float> = 0f to 360f,
@@ -480,12 +478,20 @@ internal fun bursts(
         val scale = s * (0.8 + rnd.next() * 0.5)
         val delay = -rnd.next() * 2.4
         val dur = 2 + rnd.next()
-        place(keys[i % keys.size], o.x, o.y, scale.toFloat(), 0f, "pop", delay.toFloat(), dur.toFloat())
+        place(
+            keys[i % keys.size],
+            o.x,
+            o.y,
+            scale.toFloat(),
+            0f,
+            "pop",
+            delay.toFloat(),
+            dur.toFloat()
+        )
     }
     return group(items)
 }
 
-/** Chamas tremulando sobre o círculo, mais altas no topo. */
 internal fun flames(
     n: Int, r: Float, range: Pair<Float, Float>, colors: List<Color>, seed: Int = 11,
 ): FxNode {
@@ -508,7 +514,6 @@ internal fun flames(
     return group(items)
 }
 
-/** Texto girando em círculo (cada letra tombada sobre o raio; textLength em `spacing`). */
 internal fun textRing(
     text: String, color: Color,
     size: Float = 7.2f,
@@ -524,12 +529,21 @@ internal fun textRing(
 }
 
 private fun DrawScope.drawRingText(
-    c: SeasonalCtx, text: String, color: Color, fontPx: Float, family: FontFamily, r: Float, length: Float,
+    c: SeasonalCtx,
+    text: String,
+    color: Color,
+    fontPx: Float,
+    family: FontFamily,
+    r: Float,
+    length: Float,
 ) {
     fun layoutOf(ch: Char): TextLayoutResult =
         c.textCache.getOrPut("${family.hashCode()}|$fontPx|$ch") {
-            // 1 unidade do SVG = 1 px do canvas já escalado: toSp() desfaz densidade e fontScale
-            val style = TextStyle(fontFamily = family, fontSize = fontPx.toSp(), fontWeight = FontWeight.Bold)
+            val style = TextStyle(
+                fontFamily = family,
+                fontSize = fontPx.toSp(),
+                fontWeight = FontWeight.Bold
+            )
             c.textMeasurer.measure(ch.toString(), style)
         }
 
@@ -556,7 +570,6 @@ private fun DrawScope.drawRingText(
     }
 }
 
-/** Fio de luzes de Natal piscando fora de compasso. */
 internal fun lights(n: Int, colors: List<Color>, r: Float = 56f): FxNode {
     val bulbs = List(n) { i ->
         val a = i * 360.0 / n
@@ -584,7 +597,15 @@ internal fun pixelRing(colors: List<Color>): FxNode {
         val o = polar(56.0, a)
         at(
             o.x, o.y, a.toFloat(),
-            rect(-2.6f, -2.6f, 5.2f, 5.2f, fill = colors[i % colors.size], anim = "blink", delay = -(i % 5) * 0.4f),
+            rect(
+                -2.6f,
+                -2.6f,
+                5.2f,
+                5.2f,
+                fill = colors[i % colors.size],
+                anim = "blink",
+                delay = -(i % 5) * 0.4f
+            ),
         )
     }
     return group(pixels)
@@ -596,13 +617,11 @@ internal fun arcsRing(
     pathNode(arcPath(r, a, b), stroke = c, sw = w, cap = StrokeCap.Round)
 })
 
-/** Duas asas espelhadas atrás do avatar, batendo devagar. */
 internal fun wings(art: FxNode, x: Float = 36f, y: Float = -14f): FxNode = group(
     at(-x, y, null, animated("wing", 0f, null, art)),
     xform({ translate(x, y); scale(-1f, 1f, Offset.Zero) }, animated("wing", 0f, null, art)),
 )
 
-/** O sol de verão no ângulo `a` do círculo de raio `r`, girando devagar. */
 internal fun sun(r: Float, a: Float): FxNode {
     val o = polar(r.toDouble(), a.toDouble())
     val icon = place("sol", 0f, 0f)

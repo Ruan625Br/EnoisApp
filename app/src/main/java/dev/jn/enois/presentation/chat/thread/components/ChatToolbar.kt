@@ -134,10 +134,11 @@ private fun ToolbarLeftButtons(
 fun Modifier.userAvatarSharedBounds(
     sharedTransitionScope: SharedTransitionScope = LocalSharedTransitionScope.current,
     animatedVisibilityScope: AnimatedVisibilityScope = LocalNavAnimatedContentScope.current,
+    userId: String = "",
 ): Modifier = with(sharedTransitionScope) {
     this@userAvatarSharedBounds.sharedBounds(
         sharedContentState = rememberSharedContentState(
-            key = "userAvatar"
+            key = "userAvatar-$userId"
         ),
         animatedVisibilityScope = animatedVisibilityScope,
         resizeMode = SharedTransitionScope.ResizeMode.scaleToBounds()

@@ -24,37 +24,69 @@ class UserProfileCache(
     private val scope: CoroutineScope,
 ) {
     private val _states = MutableStateFlow<Map<String, ProfileState>>(emptyMap())
+
+    private val usernameToId = ConcurrentHashMap<String, String>()
+
     private val inFlight = ConcurrentHashMap.newKeySet<String>()
     private val gate = Semaphore(4)
 
     fun observe(id: String): Flow<ProfileState?> =
         _states.map { it[id] }.distinctUntilChanged()
 
-    fun put(profile: UserProfile) =
-        _states.update { it + (profile.id to ProfileState.Loaded(profile, now())) }
+    fun observeByUsername(username: String): Flow<ProfileState?> =
+        _states
+            .map { states ->
+                usernameToId[username.lowercase()]?.let(states::get)
+            }
+            .distinctUntilChanged()
+
+    fun put(profile: UserProfile) {
+        usernameToId[profile.username.lowercase()] = profile.id
+
+        _states.update {
+            it + (profile.id to ProfileState.Loaded(profile, now()))
+        }
+    }
 
     fun ensure(id: String) {
         if (!isStale(_states.value[id])) return
-        if (!inFlight.add(id)) return
+        fetch("id:$id") {
+            repository.getProfileById(id)
+        }
+    }
+
+    fun ensureByUsername(username: String) {
+        val normalized = username.removePrefix("@").lowercase()
+
+        val cachedId = usernameToId[normalized]
+
+        if (cachedId != null && !isStale(_states.value[cachedId])) return
+
+        fetch("username:$normalized") {
+            repository.getProfileByUsername(normalized)
+        }
+    }
+
+    private fun fetch(
+        key: String,
+        request: suspend () -> Result<UserProfile>,
+    ) {
+        if (!inFlight.add(key)) return
+
         scope.launch {
             try {
-                val result = gate.withPermit { repository.getProfileById(id) }
-                _states.update { map ->
-                    val old = map[id] as? ProfileState.Loaded
-                    val next: ProfileState = result.fold(
-                        onSuccess = { ProfileState.Loaded(it, now()) },
-                        onFailure = { old?.copy(fetchedAt = now()) ?: ProfileState.Failed(now()) },
-                    )
-                    map + (id to next)
-                }
+                val result = gate.withPermit { request() }
+
+                result.onSuccess(::put)
             } finally {
-                inFlight.remove(id)
+                inFlight.remove(key)
             }
         }
     }
 
     fun clear() {
         _states.value = emptyMap()
+        usernameToId.clear()
     }
 
     private fun isStale(s: ProfileState?) = when (s) {
