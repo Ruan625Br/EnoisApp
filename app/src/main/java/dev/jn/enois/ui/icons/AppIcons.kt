@@ -59,3 +59,7 @@ object AppIcons {
     val Delete: ImageVector get() = DeleteIcon
     val Logout: ImageVector get() = LogoutIcon
 }
+
+// --- Extensão Lucide (append-only ao final de AppIcons.kt) ---
+val AppIcons.Lucide: dev.jn.enois.ui.icons.lucide.LucideIcons
+    get() = dev.jn.enois.ui.icons.lucide.LucideIcons
